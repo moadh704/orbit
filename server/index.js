@@ -58,7 +58,7 @@ app.use('/api/auth', authLimiter);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
-app.use('/api/tasks', taskRoutes);
+app.use('/api/projects/:projectId/tasks', taskRoutes);
 app.use('/api/members', memberRoutes);
 
 // Socket.io
