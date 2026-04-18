@@ -59,7 +59,7 @@ app.use('/api/auth', authLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/projects/:projectId/tasks', taskRoutes);
-app.use('/api/members', memberRoutes);
+app.use('/api/projects/:projectId/members', memberRoutes);
 
 // Socket.io
 io.on('connection', (socket) => {
