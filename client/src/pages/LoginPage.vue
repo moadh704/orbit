@@ -1,8 +1,7 @@
 <template>
   <div class="auth-page">
-    <!-- Left: Three.js particle canvas -->
+    <!-- Left: Premium visual panel (clean, no heavy Three.js for performance) -->
     <div class="auth-visual">
-      <canvas ref="canvasRef" class="particles-canvas" />
       <div class="visual-overlay">
         <div class="visual-logo">
           <svg width="40" height="40" viewBox="0 0 32 32" fill="none">
@@ -90,17 +89,15 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { Eye, EyeOff, LogIn, AlertCircle, CheckCircle2 } from 'lucide-vue-next'
-import * as THREE from 'three'
 import { useAuthStore } from '@/stores/auth'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
 
-const canvasRef = ref(null)
 const loading = ref(false)
 const error = ref('')
 const showPw = ref(false)
@@ -120,128 +117,12 @@ async function handleLogin() {
   try {
     await authStore.login(form.email, form.password)
     const redirect = router.currentRoute.value.query.redirect
-    router.push(redirect || '/')
+    router.push(redirect || { name: 'Dashboard' })
   } catch (err) {
     error.value = err.response?.data?.message || 'Invalid email or password'
   } finally {
     loading.value = false
   }
-}
-
-// ── Three.js particle system ──────────────────────────────────────────────
-let renderer, scene, camera, animId
-const PARTICLE_COUNT = 120
-
-onMounted(() => {
-  initThree()
-})
-
-onUnmounted(() => {
-  cancelAnimationFrame(animId)
-  renderer?.dispose()
-})
-
-function initThree() {
-  const canvas = canvasRef.value
-  if (!canvas) return
-
-  const w = canvas.offsetWidth
-  const h = canvas.offsetHeight
-
-  renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true })
-  renderer.setSize(w, h)
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
-  scene = new THREE.Scene()
-  camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 100)
-  camera.position.z = 5
-
-  // Particles
-  const geo = new THREE.BufferGeometry()
-  const positions = new Float32Array(PARTICLE_COUNT * 3)
-  const velocities = []
-
-  for (let i = 0; i < PARTICLE_COUNT; i++) {
-    positions[i * 3] = (Math.random() - 0.5) * 10
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 10
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 5
-    velocities.push({
-      x: (Math.random() - 0.5) * 0.005,
-      y: (Math.random() - 0.5) * 0.005
-    })
-  }
-
-  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-
-  const mat = new THREE.PointsMaterial({
-    color: 0x7C5CFF,
-    size: 0.04,
-    transparent: true,
-    opacity: 0.7,
-    sizeAttenuation: true
-  })
-
-  const points = new THREE.Points(geo, mat)
-  scene.add(points)
-
-  // Connections (lines between nearby particles)
-  const lineMat = new THREE.LineBasicMaterial({
-    color: 0x7C5CFF,
-    transparent: true,
-    opacity: 0.15
-  })
-
-  function updateConnections() {
-    scene.children.forEach(c => { if (c.isLine) scene.remove(c) })
-    const pos = geo.attributes.position.array
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      for (let j = i + 1; j < PARTICLE_COUNT; j++) {
-        const dx = pos[i*3] - pos[j*3]
-        const dy = pos[i*3+1] - pos[j*3+1]
-        const dist = Math.sqrt(dx*dx + dy*dy)
-        if (dist < 2.5) {
-          const lineGeo = new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(pos[i*3], pos[i*3+1], pos[i*3+2]),
-            new THREE.Vector3(pos[j*3], pos[j*3+1], pos[j*3+2])
-          ])
-          const line = new THREE.Line(lineGeo, lineMat)
-          scene.add(line)
-        }
-      }
-    }
-  }
-
-  let frame = 0
-  function animate() {
-    animId = requestAnimationFrame(animate)
-
-    const pos = geo.attributes.position.array
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      pos[i * 3] += velocities[i].x
-      pos[i * 3 + 1] += velocities[i].y
-
-      if (Math.abs(pos[i * 3]) > 5) velocities[i].x *= -1
-      if (Math.abs(pos[i * 3 + 1]) > 5) velocities[i].y *= -1
-    }
-    geo.attributes.position.needsUpdate = true
-
-    if (frame % 3 === 0) updateConnections()
-    frame++
-
-    points.rotation.z += 0.0003
-    renderer.render(scene, camera)
-  }
-
-  animate()
-
-  const ro = new ResizeObserver(() => {
-    const nw = canvas.offsetWidth
-    const nh = canvas.offsetHeight
-    renderer.setSize(nw, nh)
-    camera.aspect = nw / nh
-    camera.updateProjectionMatrix()
-  })
-  ro.observe(canvas)
 }
 </script>
 
@@ -252,23 +133,17 @@ function initThree() {
   background: var(--bg-app);
 }
 
-/* Left visual */
+/* Left visual - clean premium panel per DESIGN.md (no Three.js, no lag) */
 .auth-visual {
   position: relative;
   flex: 1;
   min-height: 100vh;
   overflow: hidden;
+  background: linear-gradient(145deg, #0A0B0D 0%, #111214 100%);
 }
 
 @media (max-width: 768px) {
   .auth-visual { display: none; }
-}
-
-.particles-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
 }
 
 .visual-overlay {
