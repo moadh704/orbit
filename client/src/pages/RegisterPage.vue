@@ -1,8 +1,7 @@
 <template>
   <div class="auth-page">
-    <!-- Left: Three.js particle canvas -->
+    <!-- Left: Premium visual panel (clean, no heavy Three.js) -->
     <div class="auth-visual">
-      <canvas ref="canvasRef" class="particles-canvas" />
       <div class="visual-overlay">
         <div class="visual-logo">
           <svg width="40" height="40" viewBox="0 0 32 32" fill="none">
@@ -112,16 +111,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { Eye, EyeOff, UserPlus, AlertCircle } from 'lucide-vue-next'
-import * as THREE from 'three'
 import { useAuthStore } from '@/stores/auth'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
-const canvasRef = ref(null)
 const loading = ref(false)
 const error = ref('')
 const showPw = ref(false)
@@ -159,94 +156,12 @@ async function handleRegister() {
   loading.value = true
   try {
     await authStore.register(form.name, form.email, form.password)
-    router.push('/')
+    router.push({ name: 'Dashboard' })
   } catch (err) {
     error.value = err.response?.data?.message || 'Failed to create account'
   } finally {
     loading.value = false
   }
-}
-
-// ── Three.js ─────────────────────────────────────────────────────────────
-let renderer, scene, camera, animId
-
-onMounted(() => initThree())
-onUnmounted(() => {
-  cancelAnimationFrame(animId)
-  renderer?.dispose()
-})
-
-function initThree() {
-  const canvas = canvasRef.value
-  if (!canvas) return
-  const w = canvas.offsetWidth, h = canvas.offsetHeight
-
-  renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true })
-  renderer.setSize(w, h)
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
-  scene = new THREE.Scene()
-  camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 100)
-  camera.position.z = 6
-
-  const COUNT = 80
-  const geo = new THREE.BufferGeometry()
-  const pos = new Float32Array(COUNT * 3)
-  const vels = []
-
-  for (let i = 0; i < COUNT; i++) {
-    pos[i*3] = (Math.random()-0.5)*12
-    pos[i*3+1] = (Math.random()-0.5)*10
-    pos[i*3+2] = (Math.random()-0.5)*4
-    vels.push({ x: (Math.random()-0.5)*0.006, y: (Math.random()-0.5)*0.006 })
-  }
-  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3))
-
-  const mat = new THREE.PointsMaterial({ color: 0x7C5CFF, size: 0.05, transparent: true, opacity: 0.65 })
-  const pts = new THREE.Points(geo, mat)
-  scene.add(pts)
-
-  const lineMat = new THREE.LineBasicMaterial({ color: 0x7C5CFF, transparent: true, opacity: 0.12 })
-
-  let frame = 0
-  function animate() {
-    animId = requestAnimationFrame(animate)
-    for (let i = 0; i < COUNT; i++) {
-      pos[i*3] += vels[i].x
-      pos[i*3+1] += vels[i].y
-      if (Math.abs(pos[i*3]) > 6) vels[i].x *= -1
-      if (Math.abs(pos[i*3+1]) > 5) vels[i].y *= -1
-    }
-    geo.attributes.position.needsUpdate = true
-
-    if (frame % 4 === 0) {
-      scene.children.forEach(c => { if (c.isLine) scene.remove(c) })
-      for (let i = 0; i < COUNT; i++) {
-        for (let j = i + 1; j < COUNT; j++) {
-          const dx = pos[i*3]-pos[j*3], dy = pos[i*3+1]-pos[j*3+1]
-          if (Math.sqrt(dx*dx+dy*dy) < 3) {
-            const lg = new THREE.BufferGeometry().setFromPoints([
-              new THREE.Vector3(pos[i*3],pos[i*3+1],pos[i*3+2]),
-              new THREE.Vector3(pos[j*3],pos[j*3+1],pos[j*3+2])
-            ])
-            scene.add(new THREE.Line(lg, lineMat))
-          }
-        }
-      }
-    }
-    frame++
-    pts.rotation.z += 0.0002
-    renderer.render(scene, camera)
-  }
-  animate()
-
-  const ro = new ResizeObserver(() => {
-    const nw = canvas.offsetWidth, nh = canvas.offsetHeight
-    renderer.setSize(nw, nh)
-    camera.aspect = nw / nh
-    camera.updateProjectionMatrix()
-  })
-  ro.observe(canvas)
 }
 </script>
 
@@ -257,21 +172,16 @@ function initThree() {
   background: var(--bg-app);
 }
 
+/* Left visual - clean premium panel per DESIGN.md (no Three.js particle system) */
 .auth-visual {
   position: relative;
   flex: 1;
   min-height: 100vh;
   overflow: hidden;
+  background: linear-gradient(145deg, #0A0B0D 0%, #111214 100%);
 }
 
 @media (max-width: 768px) { .auth-visual { display: none; } }
-
-.particles-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
 
 .visual-overlay {
   position: absolute;
