@@ -31,7 +31,7 @@ onMounted(async () => {
   uiStore.initTheme()
 
   // Rehydrate auth if token exists
-  if (authStore.token) {
+  if (authStore.token.value) {
     try {
       await authStore.fetchMe()
     } catch {
