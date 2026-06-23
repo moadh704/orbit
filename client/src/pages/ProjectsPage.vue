@@ -43,18 +43,16 @@
       <ProjectCard v-for="p in filtered" :key="p.id" :project="p" />
     </div>
 
-    <!-- Empty state -->
-    <div v-else class="empty-state">
-      <div class="empty-icon">
-        <FolderOpen :size="28" />
-      </div>
-      <h3>No projects yet</h3>
-      <p>Create your first project to get started with your team</p>
-      <button class="btn btn-primary" @click="showCreate = true">
-        <Plus :size="14" />
-        Create project
-      </button>
-    </div>
+    <!-- Premium Empty State -->
+    <EmptyState
+      v-else
+      :icon="FolderOpen"
+      icon-size="48"
+      title="No projects yet"
+      description="Create your first project to start collaborating with your team."
+      action-label="Create project"
+      @action="showCreate = true"
+    />
 
     <CreateProjectModal
       v-if="showCreate"
@@ -71,6 +69,7 @@ import { useProjectsStore } from '@/stores/projects'
 import { storeToRefs } from 'pinia'
 import ProjectCard from '@/components/projects/ProjectCard.vue'
 import CreateProjectModal from '@/components/projects/CreateProjectModal.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 
 const projectsStore = useProjectsStore()
 const { projects, loading } = storeToRefs(projectsStore)
@@ -207,40 +206,5 @@ onMounted(() => projectsStore.fetchProjects())
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
-}
-
-/* Empty state */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 80px 20px;
-  text-align: center;
-}
-
-.empty-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
-}
-
-.empty-state h3 {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.empty-state p {
-  font-size: 13px;
-  color: var(--text-muted);
-  max-width: 300px;
 }
 </style>
