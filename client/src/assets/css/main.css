@@ -164,6 +164,7 @@ body {
 /* ── Typography ─────────────────────────────────────────────── */
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Bricolage Grotesque', sans-serif;
+  font-feature-settings: "ss01", "ss02", "kern";
   letter-spacing: -0.02em;
   line-height: 1.2;
   color: var(--text-primary);
@@ -194,17 +195,18 @@ code, kbd, pre, .mono {
 
 /* ── Orbit component layer ──────────────────────────────────── */
 @layer components {
-  /* Card */
+  /* Card - canonical premium treatment per DESIGN.md */
   .card {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 16px;
-    transition: background 150ms ease, border-color 150ms ease;
+    transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
   }
   .card:hover {
     background: var(--bg-card-hover);
     border-color: var(--border-hover);
+    transform: translateY(-1px);
   }
 
   /* Button primary */
@@ -220,13 +222,14 @@ code, kbd, pre, .mono {
     border-radius: 8px;
     border: none;
     cursor: pointer;
-    transition: filter 100ms ease, transform 100ms ease;
+    transition: filter 100ms ease, transform 100ms ease, background-color 100ms ease;
     white-space: nowrap;
     text-decoration: none;
   }
 
   .btn:active {
     transform: translateY(1px);
+    filter: brightness(0.95);
   }
 
   .btn-primary {
@@ -234,7 +237,7 @@ code, kbd, pre, .mono {
     color: #fff;
   }
   .btn-primary:hover {
-    filter: brightness(1.1);
+    filter: brightness(1.08);
   }
 
   .btn-secondary {
@@ -262,7 +265,7 @@ code, kbd, pre, .mono {
     border: 1px solid rgba(239,68,68,0.2);
   }
   .btn-danger:hover {
-    filter: brightness(1.1);
+    filter: brightness(1.08);
   }
 
   /* Input */
@@ -277,7 +280,7 @@ code, kbd, pre, .mono {
     color: var(--text-primary);
     width: 100%;
     outline: none;
-    transition: border-color 150ms ease;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
   }
 
   .input::placeholder {
@@ -408,7 +411,7 @@ code, kbd, pre, .mono {
 }
 
 @keyframes toastSlideOut {
-  from { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity: 1; transform: translateY(0) scale(0.97); }
   to { opacity: 0; transform: translateY(12px) scale(0.97); }
 }
 
@@ -494,10 +497,11 @@ code, kbd, pre, .mono {
   transition: width 1s ease;
 }
 
-/* ── Focus ring ─────────────────────────────────────────────── */
+/* ── Focus ring (premium, accessible) ───────────────────────── */
 :focus-visible {
-  outline: 2px solid var(--accent-border);
+  outline: 1.5px solid var(--accent-border);
   outline-offset: 2px;
+  border-radius: 6px;
 }
 
 /* ── Selection ──────────────────────────────────────────────── */
