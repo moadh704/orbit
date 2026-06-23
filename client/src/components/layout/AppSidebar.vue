@@ -251,10 +251,11 @@ function handleLogout() {
   color: var(--text-secondary);
   font-size: 13px;
   font-weight: 450;
-  transition: background 100ms, color 100ms;
+  transition: background 100ms, color 100ms, border-color 100ms;
   overflow: hidden;
   white-space: nowrap;
   cursor: pointer;
+  position: relative;
 }
 
 .nav-item:hover {
@@ -264,8 +265,8 @@ function handleLogout() {
 
 .nav-item.active {
   background: var(--accent-dim);
-  border: 1px solid var(--accent-border);
   color: var(--text-primary);
+  border-left: 2px solid var(--accent);
 }
 
 .nav-item.active .nav-icon {
