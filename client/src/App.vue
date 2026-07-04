@@ -30,8 +30,8 @@ onMounted(async () => {
   // Apply persisted theme
   uiStore.initTheme()
 
-  // Rehydrate auth if token exists
-  if (authStore.token.value) {
+  // Rehydrate auth if token exists (defensive check)
+  if (authStore.token?.value) {
     try {
       await authStore.fetchMe()
     } catch {
