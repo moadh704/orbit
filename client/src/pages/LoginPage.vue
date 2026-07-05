@@ -1,6 +1,6 @@
 <template>
   <div class="auth-page">
-    <!-- Left: Premium visual panel (clean, no heavy Three.js for performance) -->
+    <!-- Left: Premium visual panel -->
     <div class="auth-visual">
       <div class="visual-overlay">
         <div class="visual-logo">
@@ -133,7 +133,6 @@ async function handleLogin() {
   background: var(--bg-app);
 }
 
-/* Left visual - clean premium panel per DESIGN.md (no Three.js, no lag) */
 .auth-visual {
   position: relative;
   flex: 1;
@@ -142,9 +141,7 @@ async function handleLogin() {
   background: linear-gradient(145deg, #0A0B0D 0%, #111214 100%);
 }
 
-@media (max-width: 768px) {
-  .auth-visual { display: none; }
-}
+@media (max-width: 768px) { .auth-visual { display: none; } }
 
 .visual-overlay {
   position: absolute;
@@ -202,7 +199,6 @@ async function handleLogin() {
   flex-shrink: 0;
 }
 
-/* Right form */
 .auth-form-side {
   width: 440px;
   min-height: 100vh;
@@ -214,12 +210,7 @@ async function handleLogin() {
   padding: 40px;
 }
 
-@media (max-width: 768px) {
-  .auth-form-side {
-    width: 100%;
-    border-left: none;
-  }
-}
+@media (max-width: 768px) { .auth-form-side { width: 100%; border-left: none; } }
 
 .auth-form-container {
   width: 100%;
@@ -237,16 +228,9 @@ async function handleLogin() {
   margin-bottom: 6px;
 }
 
-.auth-form-header p {
-  font-size: 14px;
-  color: var(--text-muted);
-}
+.auth-form-header p { font-size: 14px; color: var(--text-muted); }
 
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+.auth-form { display: flex; flex-direction: column; gap: 16px; }
 
 .auth-error {
   display: flex;
@@ -260,19 +244,10 @@ async function handleLogin() {
   color: var(--danger);
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+.field { display: flex; flex-direction: column; gap: 6px; }
 
-.input-wrap {
-  position: relative;
-}
-
-.input-wrap .input {
-  padding-right: 38px;
-}
+.input-wrap { position: relative; }
+.input-wrap .input { padding-right: 38px; }
 
 .pw-toggle {
   position: absolute;
@@ -309,5 +284,4 @@ async function handleLogin() {
   text-decoration: none;
   font-weight: 500;
 }
-.auth-switch a:hover { text-decoration: underline; }
 </style>
