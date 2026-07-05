@@ -1,6 +1,6 @@
 <template>
   <div class="auth-page">
-    <!-- Left: Premium visual panel (clean, no heavy Three.js) -->
+    <!-- Left: Premium visual panel -->
     <div class="auth-visual">
       <div class="visual-overlay">
         <div class="visual-logo">
@@ -79,6 +79,23 @@
                 <Eye v-else :size="14" />
               </button>
             </div>
+
+            <!-- Confirm Password -->
+            <div class="input-wrap mt-3">
+              <input
+                v-model="form.confirmPassword"
+                :type="showConfirmPw ? 'text' : 'password'"
+                class="input"
+                placeholder="Confirm password"
+                autocomplete="new-password"
+                required
+              />
+              <button type="button" class="pw-toggle" @click="showConfirmPw = !showConfirmPw">
+                <EyeOff v-if="showConfirmPw" :size="14" />
+                <Eye v-else :size="14" />
+              </button>
+            </div>
+
             <div class="pw-strength">
               <div
                 v-for="i in 4"
@@ -90,16 +107,29 @@
             </div>
           </div>
 
-          <button type="submit" class="btn btn-primary auth-submit" :disabled="loading">
+          <!-- Terms Checkbox -->
+          <div class="terms-checkbox">
+            <input
+              type="checkbox"
+              id="terms"
+              v-model="acceptedTerms"
+              required
+            />
+            <label for="terms">
+              I agree to the <a href="#" class="terms-link">Terms of Service</a> and <a href="#" class="terms-link">Privacy Policy</a>
+            </label>
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-primary auth-submit"
+            :disabled="loading || !acceptedTerms"
+          >
             <LoadingSpinner v-if="loading" :size="15" />
             <UserPlus v-else :size="15" />
             {{ loading ? 'Creating account...' : 'Create account' }}
           </button>
         </form>
-
-        <p class="auth-terms">
-          By signing up you agree to our terms of service and privacy policy.
-        </p>
 
         <p class="auth-switch">
           Already have an account?
@@ -119,11 +149,19 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
+
 const loading = ref(false)
 const error = ref('')
 const showPw = ref(false)
+const showConfirmPw = ref(false)
+const acceptedTerms = ref(false)
 
-const form = reactive({ name: '', email: '', password: '' })
+const form = reactive({
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: ''
+})
 
 const steps = [
   { title: 'Create your account', desc: 'Get access to your workspace in seconds' },
@@ -149,10 +187,22 @@ const strengthColor = computed(() => {
 
 async function handleRegister() {
   error.value = ''
+
   if (form.password.length < 6) {
     error.value = 'Password must be at least 6 characters'
     return
   }
+
+  if (form.password !== form.confirmPassword) {
+    error.value = 'Passwords do not match'
+    return
+  }
+
+  if (!acceptedTerms.value) {
+    error.value = 'You must accept the Terms and Privacy Policy'
+    return
+  }
+
   loading.value = true
   try {
     await authStore.register(form.name, form.email, form.password)
@@ -172,7 +222,6 @@ async function handleRegister() {
   background: var(--bg-app);
 }
 
-/* Left visual - clean premium panel per DESIGN.md (no Three.js particle system) */
 .auth-visual {
   position: relative;
   flex: 1;
@@ -282,7 +331,7 @@ async function handleRegister() {
 
 .field { display: flex; flex-direction: column; gap: 6px; }
 
-.input-wrap { position: relative; }
+.input-wrap { position: relative; margin-bottom: 8px; }
 .input-wrap .input { padding-right: 38px; }
 
 .pw-toggle {
@@ -302,6 +351,7 @@ async function handleRegister() {
   display: flex;
   gap: 4px;
   margin-top: 6px;
+  margin-bottom: 12px;
 }
 
 .pw-bar {
@@ -315,19 +365,34 @@ async function handleRegister() {
 .pw-bar.active { opacity: 1; }
 .pw-bar:not(.active) { background: var(--border) !important; }
 
+.terms-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.terms-checkbox input {
+  margin-top: 3px;
+}
+
+.terms-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.terms-link:hover {
+  text-decoration: underline;
+}
+
 .auth-submit {
   width: 100%;
   height: 38px;
   justify-content: center;
   font-size: 14px;
   margin-top: 4px;
-}
-
-.auth-terms {
-  font-size: 11px;
-  color: var(--text-muted);
-  text-align: center;
-  line-height: 1.5;
 }
 
 .auth-switch {
