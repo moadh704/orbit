@@ -7,6 +7,9 @@ const pool = mysql.createPool({
   password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD,
   database: process.env.MYSQLDATABASE || process.env.DB_NAME,
   port: process.env.MYSQLPORT || process.env.DB_PORT || 3306,
+  ssl: {
+    rejectUnauthorized: false   // Required for Aiven Free MySQL
+  }
 });
 
 module.exports = pool.promise();
