@@ -1,16 +1,25 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
 const sendInviteEmail = async (to, inviterName, projectName, token) => {
-  const inviteLink = `${process.env.CLIENT_URL}/invite/${token}`;
+  const baseUrl =
+    process.env.CLIENT_URL ||
+    process.env.RENDER_EXTERNAL_URL ||
+    'http://localhost:5173';
+  const inviteLink = `${baseUrl.replace(/\/$/, '')}/invite/${token}`;
+
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.log(`[email skipped] Invite for ${to}: ${inviteLink}`);
+    return { skipped: true, inviteLink };
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
 
   await transporter.sendMail({
     from: `"Orbit" <${process.env.EMAIL_USER}>`,

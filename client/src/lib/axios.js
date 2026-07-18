@@ -1,28 +1,25 @@
 import axios from 'axios'
 
-// Dynamic baseURL:
-// - Development: uses Vite proxy (/api -> localhost)
-// - Production: uses the full backend URL from environment variable
-const baseURL = import.meta.env.DEV
-  ? '/api'
-  : `${import.meta.env.VITE_API_URL}/api`
+// Same-origin `/api` when SPA is served by Express (Render single service).
+// Or set VITE_API_URL=https://your-api.onrender.com for a split frontend host.
+const apiBase = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/api`
+  : '/api'
 
 const api = axios.create({
-  baseURL,
-  timeout: 15000,
+  baseURL: apiBase,
+  timeout: 30000,
   headers: { 'Content-Type': 'application/json' }
 })
 
-// Attach token from localStorage
+// Attach token
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('orbit_token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
+  if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })
 
-// Handle 401 Unauthorized globally
+// Handle 401 globally
 api.interceptors.response.use(
   res => res,
   err => {
