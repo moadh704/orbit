@@ -47,6 +47,12 @@ const routes = [
     ]
   },
   {
+    path: '/invite/:token',
+    name: 'AcceptInvite',
+    component: () => import('@/pages/AcceptInvitePage.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('@/pages/NotFoundPage.vue')

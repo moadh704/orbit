@@ -25,7 +25,10 @@ api.interceptors.response.use(
   err => {
     if (err.response?.status === 401) {
       localStorage.removeItem('orbit_token')
-      window.location.href = '/login'
+      const path = window.location.pathname + window.location.search
+      if (!path.startsWith('/login')) {
+        window.location.href = '/login?redirect=' + encodeURIComponent(path)
+      }
     }
     return Promise.reject(err)
   }

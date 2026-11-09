@@ -581,10 +581,10 @@ DB_NAME=orbit
 
 JWT_SECRET=your-super-secret-key-change-this
 
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=noreply@example.com
-SMTP_PASS=yoursmtppassword
+# Optional. Invites are skipped when these are empty.
+# The mailer uses nodemailer service "gmail", not a custom SMTP host.
+EMAIL_USER=you@gmail.com
+EMAIL_PASS=your-gmail-app-password
 ```
 
 ### 3 — Frontend

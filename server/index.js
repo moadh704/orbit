@@ -12,6 +12,8 @@ const authRoutes = require('./routes/authRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const memberRoutes = require('./routes/memberRoutes');
+const { protect } = require('./middleware/authMiddleware');
+const { acceptInvite } = require('./controllers/memberController');
 const { migrate } = require('./db/migrate');
 
 const app = express();
@@ -92,6 +94,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/projects/:projectId/tasks', taskRoutes);
 app.use('/api/projects/:projectId/members', memberRoutes);
+// Email links are /invite/:token and do not include a project id.
+// acceptInvite looks the token up, so this route does not need one.
+app.post('/api/invites/:token/accept', protect, acceptInvite);
 
 // Socket.io
 io.on('connection', (socket) => {
