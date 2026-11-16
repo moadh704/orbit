@@ -7,6 +7,7 @@ const fs = require('fs');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 require('dotenv').config();
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'light-demo-jwt-secret-orbit';
 
 const authRoutes = require('./routes/authRoutes');
 const projectRoutes = require('./routes/projectRoutes');
@@ -14,7 +15,7 @@ const taskRoutes = require('./routes/taskRoutes');
 const memberRoutes = require('./routes/memberRoutes');
 const { protect } = require('./middleware/authMiddleware');
 const { acceptInvite } = require('./controllers/memberController');
-const { migrate } = require('./db/migrate');
+const { ensure } = require('./db/migrate');
 
 const app = express();
 const httpServer = createServer(app);
@@ -34,7 +35,7 @@ function isAllowedOrigin(origin) {
   if (!origin) return true;
   if (allowedOrigins.includes(origin)) return true;
   // Render preview / custom domains
-  if (origin.endsWith('.onrender.com')) return true;
+  if (origin.endsWith('.onrender.com') || origin.endsWith('.vercel.app')) return true;
   return false;
 }
 
@@ -86,6 +87,15 @@ const authLimiter = rateLimit({
 app.use('/api/auth', authLimiter);
 
 // Health check for Render
+app.use(async (req, res, next) => {
+  try {
+    await ensure();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, spa: serveSpa });
 });
@@ -128,16 +138,14 @@ if (serveSpa) {
 
 const PORT = process.env.PORT || 8080;
 
-async function start() {
-  try {
-    await migrate();
-  } catch (err) {
-    console.error('DB migrate failed (will still start):', err.message);
-  }
-
-  httpServer.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT} (SPA: ${serveSpa})`);
-  });
+if (!process.env.VERCEL) {
+  ensure()
+    .catch((err) => console.error('DB migrate failed (will still start):', err.message))
+    .finally(() => {
+      httpServer.listen(PORT, '0.0.0.0', () => {
+        console.log(`Server running on port ${PORT} (SPA: ${serveSpa})`);
+      });
+    });
 }
 
-start();
+module.exports = app;
